@@ -38,6 +38,7 @@ REMOTE_USER='pi'
 # VERIFY_PASS=''			# replace in gravity-sync.conf to overwrite
 # SKIP_CUSTOM=''			# replace in gravity-sync.conf to overwrite
 # INCLUDE_CNAME=''			# replace in gravity-sync.conf to overwrite
+# INCLUDE_GSLAN=''			# replace in gravity-sync.conf to overwrite
 # DATE_OUTPUT=''			# replace in gravity-sync.conf to overwrite
 # PING_AVOID=''				# replace in gravity-sync.conf to overwrite
 # ROOT_CHECK_AVOID=''		# replace in gravity-sync.conf to overwrite
