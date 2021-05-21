@@ -14,7 +14,7 @@ function task_compare {
     validate_gs_folders
     validate_ph_folders
     
-    if [ "${INCLUDE_CNAME}" == "1" ]
+    if [ "${INCLUDE_CNAME}" == "1" || "${INCLUDE_GSLAN}" == "1"]
     then
         validate_dns_folders
     fi
