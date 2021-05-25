@@ -13,12 +13,7 @@ function task_smart {
     show_target
     validate_gs_folders
     validate_ph_folders
-    
-    if [ "${INCLUDE_CNAME}" == "1" ]
-    then
-        validate_dns_folders
-    fi
-    
+    validate_dns_folders
     validate_sqlite3
     validate_os_sshpass
     

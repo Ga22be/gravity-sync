@@ -13,17 +13,15 @@ function task_compare {
     show_target
     validate_gs_folders
     validate_ph_folders
-    
-    if [ "${INCLUDE_CNAME}" == "1" || "${INCLUDE_GSLAN}" == "1"]
-    then
-        validate_dns_folders
-    fi
-    
+    validate_dns_folders
     validate_os_sshpass
     
     previous_md5
     md5_compare
+    for K in "${!REMOTE_DNS[@]}"; do echo $K --- ${REMOTE_DNS[$K]}; done
+    echo "${REMOTE_DNS[GSLAN]}"
     backup_cleanup
-    
+
+
     exit_withchange
 }

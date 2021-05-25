@@ -72,96 +72,53 @@ function md5_compare {
     
     if [ "${SKIP_CUSTOM}" != '1' ]
     then
-        if [ "${INCLUDE_CNAME}" == "1" ]
-        then
-            if [ -f ${DNSMAQ_DIR}/${CNAME_CONF} ]
+        declare -gA REMOTE_DNS
+        for ENTRY_NAME in "${!DNSMAQ_FILES[@]}"
+        do
+            echo $ENTRY_NAME --- ${DNSMAQ_FILES[$ENTRY_NAME]};
+            UI_NAME="UI_${ENTRY_NAME}_NAME"
+
+            if [ -f ${DNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} ]
             then
-                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${CNAME_CONF}
+                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]}
                 then
-                    REMOTE_CNAME_DNS="1"
-                    MESSAGE="${UI_HASHING_HASHING} ${UI_CNAME_NAME}"
-                    echo_stat
-                    
-                    primaryCNMD5=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${CNAME_CONF} | sed 's/\s.*$//'")
-                    error_validate
-                    
-                    MESSAGE="${UI_HASHING_COMPARING} ${UI_CNAME_NAME}"
-                    echo_stat
-                    secondCNMD5=$(md5sum ${DNSMAQ_DIR}/${CNAME_CONF} | sed 's/\s.*$//')
-                    error_validate
-                    
-                    if [ "$primaryCNMD5" == "$last_primaryCNMD5" ] && [ "$secondCNMD5" == "$last_secondCNMD5" ]
-                    then
-                        HASHMARK=$((HASHMARK+0))
-                    else
-                        MESSAGE="${UI_HASHING_DIFFERNCE} ${UI_CNAME_NAME}"
-                        echo_warn
-                        HASHMARK=$((HASHMARK+1))
-                    fi
-                else
-                    MESSAGE="${UI_CNAME_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
-                    echo_info
-                fi
-            else
-                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${CNAME_CONF}
-                then
-                    REMOTE_CNAME_DNS="1"
-                    MESSAGE="${UI_CNAME_NAME} ${UI_HASHING_DETECTED} ${UI_HASHING_PRIMARY}"
-                    HASHMARK=$((HASHMARK+1))
-                    echo_info
-                fi
-                
-                MESSAGE="${UI_CNAME_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_SECONDARY}"
-                echo_info
-            fi
-        fi
-    fi
-
-    if [ "${SKIP_CUSTOM}" != '1' ]
-    then
-        if [ "${INCLUDE_GSLAN}" == "1" ]
-        then
-            if [ -f ${DNSMAQ_DIR}/${GSLAN_CONF} ]
-            then
-                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${GSLAN_CONF}
-                then
-                    REMOTE_GSLAN_DNS="1"
-                    MESSAGE="${UI_HASHING_HASHING} ${UI_GSLAN_NAME}"
+                    REMOTE_DNS+=( ["${ENTRY_NAME}"]="1" )
+                    MESSAGE="${UI_HASHING_HASHING} ${!UI_NAME}"
                     echo_stat
 
-                    primaryCNMD5=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${GSLAN_CONF} | sed 's/\s.*$//'")
+                    primaryCNMD5=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} | sed 's/\s.*$//'")
                     error_validate
 
-                    MESSAGE="${UI_HASHING_COMPARING} ${UI_GSLAN_NAME}"
+                    MESSAGE="${UI_HASHING_COMPARING} ${!UI_NAME}"
                     echo_stat
-                    secondCNMD5=$(md5sum ${DNSMAQ_DIR}/${GSLAN_CONF} | sed 's/\s.*$//')
+                    secondCNMD5=$(md5sum ${DNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} | sed 's/\s.*$//')
                     error_validate
 
                     if [ "$primaryCNMD5" == "$last_primaryCNMD5" ] && [ "$secondCNMD5" == "$last_secondCNMD5" ]
                     then
                         HASHMARK=$((HASHMARK+0))
                     else
-                        MESSAGE="${UI_HASHING_DIFFERNCE} ${UI_GSLAN_NAME}"
+                        MESSAGE="${UI_HASHING_DIFFERNCE} ${!UI_NAME}"
                         echo_warn
                         HASHMARK=$((HASHMARK+1))
                     fi
                 else
-                    MESSAGE="${UI_GSLAN_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
+                    MESSAGE="${!UI_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
                     echo_info
                 fi
             else
-                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${GSLAN_CONF}
+                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]}
                 then
-                    REMOTE_GSLAN_DNS="1"
-                    MESSAGE="${UI_GSLAN_NAME} ${UI_HASHING_DETECTED} ${UI_HASHING_PRIMARY}"
+                    REMOTE_DNS+=( ["${ENTRY_NAME}"]="1" )
+                    MESSAGE="${!UI_NAME} ${UI_HASHING_DETECTED} ${UI_HASHING_PRIMARY}"
                     HASHMARK=$((HASHMARK+1))
                     echo_info
                 fi
 
-                MESSAGE="${UI_GSLAN_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_SECONDARY}"
+                MESSAGE="${!UI_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_SECONDARY}"
                 echo_info
             fi
-        fi
+        done
     fi
     
     if [ "$HASHMARK" != "0" ]
@@ -247,75 +204,42 @@ function md5_recheck {
     
     if [ "${SKIP_CUSTOM}" != '1' ]
     then
-        if [ "${INCLUDE_CNAME}" == "1" ]
-        then
-            if [ -f ${DNSMAQ_DIR}/${CNAME_CONF} ]
+        declare -gA REMOTE_DNS
+        for ENTRY_NAME in "${!DNSMAQ_FILES[@]}"
+        do
+            echo $ENTRY_NAME --- ${DNSMAQ_FILES[$ENTRY_NAME]};
+            UI_NAME="UI_${ENTRY_NAME}_NAME"
+
+            if [ -f ${DNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} ]
             then
-                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${CNAME_CONF}
+                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]}
                 then
-                    REMOTE_CNAME_DNS="1"
-                    MESSAGE="${UI_HASHING_REHASHING} ${UI_CNAME_NAME}"
+                    REMOTE_DNS+=( ["${ENTRY_NAME}"]="1" )
+                    MESSAGE="${UI_HASHING_REHASHING} ${!UI_NAME}"
                     echo_stat
                     
-                    primaryCNMD5=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${CNAME_CONF} | sed 's/\s.*$//'")
+                    primaryCNMD5=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} | sed 's/\s.*$//'")
                     silent_error_validate
                     
-                    MESSAGE="${UI_HASHING_RECOMPARING} ${UI_CNAME_NAME}"
+                    MESSAGE="${UI_HASHING_RECOMPARING} ${!UI_NAME}"
                     echo_stat
-                    secondCNMD5=$(md5sum ${DNSMAQ_DIR}/${CNAME_CONF} | sed 's/\s.*$//')
+                    secondCNMD5=$(md5sum ${DNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} | sed 's/\s.*$//')
                     silent_error_validate
                 else
-                    MESSAGE="${UI_CNAME_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
+                    MESSAGE="${!UI_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
                     echo_info
                 fi
             else
-                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${CNAME_CONF}
+                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]}
                 then
-                    REMOTE_CNAME_DNS="1"
-                    MESSAGE="${UI_CNAME_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
+                    REMOTE_DNS+=( ["${ENTRY_NAME}"]="1" )
+                    MESSAGE="${!UI_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
                     echo_info
                 fi
                 
-                MESSAGE="${UI_CNAME_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_SECONDARY}"
+                MESSAGE="${!UI_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_SECONDARY}"
                 echo_info
             fi
-        fi
-    fi
-
-    if [ "${SKIP_CUSTOM}" != '1' ]
-    then
-        if [ "${INCLUDE_GSLAN}" == "1" ]
-        then
-            if [ -f ${DNSMAQ_DIR}/${GSLAN_CONF} ]
-            then
-                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${GSLAN_CONF}
-                then
-                    REMOTE_GSLAN_DNS="1"
-                    MESSAGE="${UI_HASHING_REHASHING} ${UI_GSLAN_NAME}"
-                    echo_stat
-
-                    primaryCNMD5=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${GSLAN_CONF} | sed 's/\s.*$//'")
-                    silent_error_validate
-
-                    MESSAGE="${UI_HASHING_RECOMPARING} ${UI_GSLAN_NAME}"
-                    echo_stat
-                    secondCNMD5=$(md5sum ${DNSMAQ_DIR}/${GSLAN_CONF} | sed 's/\s.*$//')
-                    silent_error_validate
-                else
-                    MESSAGE="${UI_GSLAN_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
-                    echo_info
-                fi
-            else
-                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${GSLAN_CONF}
-                then
-                    REMOTE_GSLAN_DNS="1"
-                    MESSAGE="${UI_GSLAN_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
-                    echo_info
-                fi
-
-                MESSAGE="${UI_GSLAN_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_SECONDARY}"
-                echo_info
-            fi
-        fi
+        done
     fi
 }

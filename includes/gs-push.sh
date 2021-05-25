@@ -13,12 +13,7 @@ function task_push {
     show_target
     validate_gs_folders
     validate_ph_folders
-    
-    if [ "${INCLUDE_CNAME}" == "1" ]
-    then
-        validate_dns_folders
-    fi
-    
+    validate_dns_folders
     validate_sqlite3
     validate_os_sshpass
     
@@ -97,7 +92,7 @@ function push_gs_cust {
     fi
 }
 
-## Push Custom
+## Push CNAME
 function push_gs_cname {
     if [ "${INCLUDE_CNAME}" == '1' ]
     then
@@ -136,6 +131,45 @@ function push_gs_cname {
     fi
 }
 
+## Push GSLAN
+function push_gs_gslan {
+    if [ "${INCLUDE_GSLAN}" == '1' ]
+    then
+        if ["${REMOTE_DNS[GSLAN]}" == "1" ]
+        then
+            backup_remote_gslan
+            backup_local_gslan
+            
+            MESSAGE="${UI_BACKUP_COPY} ${UI_GSLAN_NAME}"
+            echo_stat
+            RSYNC_REPATH="rsync"
+            RSYNC_SOURCE="${REMOTE_USER}@${REMOTE_HOST}:${RIHOLE_DIR}/dnsmasq.d-${GSLAN_CONF}.backup"
+            RSYNC_TARGET="${LOCAL_FOLDR}/${BACKUP_FOLD}/${GSLAN_CONF}.push"
+            create_rsynccmd
+            
+            MESSAGE="${UI_PUSH_SECONDARY} ${UI_GSLAN_NAME}"
+            echo_stat
+            RSYNC_REPATH="sudo rsync"
+            RSYNC_SOURCE="${LOCAL_FOLDR}/${BACKUP_FOLD}/${BACKUPTIMESTAMP}-${GSLAN_CONF}.backup"
+            RSYNC_TARGET="${REMOTE_USER}@${REMOTE_HOST}:${RNSMAQ_DIR}/${GSLAN_CONF}"
+            create_rsynccmd
+            
+            MESSAGE="${UI_SET_FILE_OWNERSHIP} ${UI_GSLAN_NAME}"
+            echo_stat
+            CMD_TIMEOUT='15'
+            CMD_REQUESTED="sudo chown root:root ${RNSMAQ_DIR}/${GSLAN_CONF}"
+            create_sshcmd
+            
+                        
+            MESSAGE="${UI_SET_FILE_PERMISSIONS} ${UI_GSLAN_NAME}"
+            echo_stat
+            CMD_TIMEOUT='15'
+            CMD_REQUESTED="sudo chmod 644 ${RNSMAQ_DIR}/${GSLAN_CONF}"
+            create_sshcmd
+        fi
+    fi
+}
+
 ## Push Reload
 function push_gs_reload {
     MESSAGE="${UI_PUSH_RELOAD_WAIT}"
@@ -166,6 +200,7 @@ function push_gs {
     push_gs_grav
     push_gs_cust
     push_gs_cname
+    push_gs_gslan
     push_gs_reload
     md5_recheck
     backup_cleanup

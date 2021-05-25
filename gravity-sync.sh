@@ -46,6 +46,7 @@ GSLAN_CONF='08-gs-lan.conf'                 # default DNSMASQ GS managed file
 VERIFY_PASS='0'						# replace in gravity-sync.conf to overwrite
 SKIP_CUSTOM='0'						# replace in gravity-sync.conf to overwrite
 INCLUDE_CNAME='0'					# replace in gravity-sync.conf to overwrite
+INCLUDE_GSLAN='0'					# replace in gravity-sync.conf to overwrite
 DATE_OUTPUT='0'						# replace in gravity-sync.conf to overwrite
 PING_AVOID='0'						# replace in gravity-sync.conf to overwrite
 ROOT_CHECK_AVOID='0'				# replace in gravity-sync.conf to overwrite

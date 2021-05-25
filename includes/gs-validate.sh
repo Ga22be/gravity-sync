@@ -64,16 +64,19 @@ function validate_ph_folders {
 
 ## Validate DNSMASQ Folders
 function validate_dns_folders {
-    MESSAGE="${UI_VALIDATING} ${UI_CORE_APP_DNS}"
-    echo_stat
-    
-    if [ ! -d ${DNSMAQ_DIR} ]
+    if [ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_GSLAN}" == "1"]
     then
-        MESSAGE="${UI_VALIDATING_FAIL_FOLDER} ${UI_CORE_APP_DNS}"
-        echo_fail
-        exit_nochange
+        MESSAGE="${UI_VALIDATING} ${UI_CORE_APP_DNS}"
+        echo_stat
+        
+        if [ ! -d ${DNSMAQ_DIR} ]
+        then
+            MESSAGE="${UI_VALIDATING_FAIL_FOLDER} ${UI_CORE_APP_DNS}"
+            echo_fail
+            exit_nochange
+        fi
+        echo_sameline
     fi
-    echo_sameline
 }
 
 ## Validate SQLite3
@@ -266,6 +269,47 @@ function validate_cname_permissions() {
         MESSAGE="${UI_SET_FILE_PERMISSION} ${UI_CNAME_NAME}"
         echo_stat
         sudo chmod 644 ${DNSMAQ_DIR}/${CNAME_CONF} >/dev/null 2>&1
+        error_validate
+    fi
+}
+
+## Validate Local DNS Custom Configuration Permissions
+function validate_gslan_permissions() {
+    MESSAGE="${UI_VAL_FILE_OWNERSHIP} ${UI_GSLAN_NAME}"
+    echo_stat
+    
+    GSLANLS_OWN=$(ls -ld ${DNSMAQ_DIR}/${GSLAN_CONF} | awk '{print $3 $4}')
+    if [ "$GSLANLS_OWN" == "rootroot" ]
+    then
+        echo_good
+    else
+        echo_fail
+        
+        MESSAGE="${UI_COMPENSATE}"
+        echo_warn
+        
+        MESSAGE="${UI_SET_FILE_OWNERSHIP} ${UI_GSLAN_NAME}"
+        echo_stat
+        sudo chown root:root ${DNSMAQ_DIR}/${GSLAN_CONF} >/dev/null 2>&1
+        error_validate
+    fi
+    
+    MESSAGE="${UI_VAL_FILE_PERMISSION} ${UI_GSLAN_NAME}"
+    echo_stat
+    
+    GSLANLS_RWE=$(namei -m ${DNSMAQ_DIR}/${GSLAN_CONF} | grep -v f: | grep ${GSLAN_CONF} | awk '{print $1}')
+    if [ "$GSLANLS_RWE" == "-rw-r--r--" ]
+    then
+        echo_good
+    else
+        echo_fail
+        
+        MESSAGE="${UI_COMPENSATE}"
+        echo_warn
+        
+        MESSAGE="${UI_SET_FILE_PERMISSION} ${UI_GSLAN_NAME}"
+        echo_stat
+        sudo chmod 644 ${DNSMAQ_DIR}/${GSLAN_CONF} >/dev/null 2>&1
         error_validate
     fi
 }
