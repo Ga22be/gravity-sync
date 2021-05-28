@@ -64,7 +64,7 @@ function validate_ph_folders {
 
 ## Validate DNSMASQ Folders
 function validate_dns_folders {
-    if [ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_GSLAN}" == "1"]
+    if [ "${INCLUDE_FILES["CNAME"]}" == "1" ] || [ "${INCLUDE_FILES["GSLAN"]}" == "1"]
     then
         MESSAGE="${UI_VALIDATING} ${UI_CORE_APP_DNS}"
         echo_stat
@@ -233,53 +233,94 @@ function validate_custom_permissions() {
 }
 
 ## Validate Local DNS CNAME Permissions
-function validate_cname_permissions() {
-    MESSAGE="${UI_VAL_FILE_OWNERSHIP} ${UI_CNAME_NAME}"
-    echo_stat
+# function validate_cname_permissions() {
+#     MESSAGE="${UI_VAL_FILE_OWNERSHIP} ${UI_CNAME_NAME}"
+#     echo_stat
     
-    CNAMELS_OWN=$(ls -ld ${DNSMAQ_DIR}/${CNAME_CONF} | awk '{print $3 $4}')
-    if [ "$CNAMELS_OWN" == "rootroot" ]
-    then
-        echo_good
-    else
-        echo_fail
+#     CNAMELS_OWN=$(ls -ld ${DNSMAQ_DIR}/${CNAME_CONF} | awk '{print $3 $4}')
+#     if [ "$CNAMELS_OWN" == "rootroot" ]
+#     then
+#         echo_good
+#     else
+#         echo_fail
         
-        MESSAGE="${UI_COMPENSATE}"
-        echo_warn
+#         MESSAGE="${UI_COMPENSATE}"
+#         echo_warn
         
-        MESSAGE="${UI_SET_FILE_OWNERSHIP} ${UI_CNAME_NAME}"
-        echo_stat
-        sudo chown root:root ${DNSMAQ_DIR}/${CNAME_CONF} >/dev/null 2>&1
-        error_validate
-    fi
+#         MESSAGE="${UI_SET_FILE_OWNERSHIP} ${UI_CNAME_NAME}"
+#         echo_stat
+#         sudo chown root:root ${DNSMAQ_DIR}/${CNAME_CONF} >/dev/null 2>&1
+#         error_validate
+#     fi
     
-    MESSAGE="${UI_VAL_FILE_PERMISSION} ${UI_CNAME_NAME}"
-    echo_stat
+#     MESSAGE="${UI_VAL_FILE_PERMISSION} ${UI_CNAME_NAME}"
+#     echo_stat
     
-    CNAMELS_RWE=$(namei -m ${DNSMAQ_DIR}/${CNAME_CONF} | grep -v f: | grep ${CNAME_CONF} | awk '{print $1}')
-    if [ "$CNAMELS_RWE" == "-rw-r--r--" ]
-    then
-        echo_good
-    else
-        echo_fail
+#     CNAMELS_RWE=$(namei -m ${DNSMAQ_DIR}/${CNAME_CONF} | grep -v f: | grep ${CNAME_CONF} | awk '{print $1}')
+#     if [ "$CNAMELS_RWE" == "-rw-r--r--" ]
+#     then
+#         echo_good
+#     else
+#         echo_fail
         
-        MESSAGE="${UI_COMPENSATE}"
-        echo_warn
+#         MESSAGE="${UI_COMPENSATE}"
+#         echo_warn
         
-        MESSAGE="${UI_SET_FILE_PERMISSION} ${UI_CNAME_NAME}"
-        echo_stat
-        sudo chmod 644 ${DNSMAQ_DIR}/${CNAME_CONF} >/dev/null 2>&1
-        error_validate
-    fi
-}
+#         MESSAGE="${UI_SET_FILE_PERMISSION} ${UI_CNAME_NAME}"
+#         echo_stat
+#         sudo chmod 644 ${DNSMAQ_DIR}/${CNAME_CONF} >/dev/null 2>&1
+#         error_validate
+#     fi
+# }
 
 ## Validate Local DNS Custom Configuration Permissions
-function validate_gslan_permissions() {
-    MESSAGE="${UI_VAL_FILE_OWNERSHIP} ${UI_GSLAN_NAME}"
+# function validate_gslan_permissions() {
+#     MESSAGE="${UI_VAL_FILE_OWNERSHIP} ${UI_GSLAN_NAME}"
+#     echo_stat
+    
+#     GSLANLS_OWN=$(ls -ld ${DNSMAQ_DIR}/${GSLAN_CONF} | awk '{print $3 $4}')
+#     if [ "$GSLANLS_OWN" == "rootroot" ]
+#     then
+#         echo_good
+#     else
+#         echo_fail
+        
+#         MESSAGE="${UI_COMPENSATE}"
+#         echo_warn
+        
+#         MESSAGE="${UI_SET_FILE_OWNERSHIP} ${UI_GSLAN_NAME}"
+#         echo_stat
+#         sudo chown root:root ${DNSMAQ_DIR}/${GSLAN_CONF} >/dev/null 2>&1
+#         error_validate
+#     fi
+    
+#     MESSAGE="${UI_VAL_FILE_PERMISSION} ${UI_GSLAN_NAME}"
+#     echo_stat
+    
+#     GSLANLS_RWE=$(namei -m ${DNSMAQ_DIR}/${GSLAN_CONF} | grep -v f: | grep ${GSLAN_CONF} | awk '{print $1}')
+#     if [ "$GSLANLS_RWE" == "-rw-r--r--" ]
+#     then
+#         echo_good
+#     else
+#         echo_fail
+        
+#         MESSAGE="${UI_COMPENSATE}"
+#         echo_warn
+        
+#         MESSAGE="${UI_SET_FILE_PERMISSION} ${UI_GSLAN_NAME}"
+#         echo_stat
+#         sudo chmod 644 ${DNSMAQ_DIR}/${GSLAN_CONF} >/dev/null 2>&1
+#         error_validate
+#     fi
+# }
+
+## Validate DNSMASQ File Permissions
+function validate_dnsmasq_permissions() {
+    MESSAGE="${UI_VAL_FILE_OWNERSHIP} ${UI_NAME[$1]}"
     echo_stat
     
-    GSLANLS_OWN=$(ls -ld ${DNSMAQ_DIR}/${GSLAN_CONF} | awk '{print $3 $4}')
-    if [ "$GSLANLS_OWN" == "rootroot" ]
+    LS_OWN=$(ls -ld ${DNSMAQ_DIR}/${DNSMAQ_FILES[$1]} | awk '{print $3 $4}')
+    if [ "$LS_OWN" == "rootroot" ]
     then
         echo_good
     else
@@ -288,17 +329,17 @@ function validate_gslan_permissions() {
         MESSAGE="${UI_COMPENSATE}"
         echo_warn
         
-        MESSAGE="${UI_SET_FILE_OWNERSHIP} ${UI_GSLAN_NAME}"
+        MESSAGE="${UI_SET_FILE_OWNERSHIP} ${UI_NAME[$1]}"
         echo_stat
-        sudo chown root:root ${DNSMAQ_DIR}/${GSLAN_CONF} >/dev/null 2>&1
+        sudo chown root:root ${DNSMAQ_DIR}/${DNSMAQ_FILES[$1]} >/dev/null 2>&1
         error_validate
     fi
     
-    MESSAGE="${UI_VAL_FILE_PERMISSION} ${UI_GSLAN_NAME}"
+    MESSAGE="${UI_VAL_FILE_PERMISSION} ${UI_NAME[$1]}"
     echo_stat
     
-    GSLANLS_RWE=$(namei -m ${DNSMAQ_DIR}/${GSLAN_CONF} | grep -v f: | grep ${GSLAN_CONF} | awk '{print $1}')
-    if [ "$GSLANLS_RWE" == "-rw-r--r--" ]
+    LS_RWE=$(namei -m ${DNSMAQ_DIR}/${DNSMAQ_FILES[$1]} | grep -v f: | grep ${DNSMAQ_FILES[$1]} | awk '{print $1}')
+    if [ "$LS_RWE" == "-rw-r--r--" ]
     then
         echo_good
     else
@@ -307,10 +348,9 @@ function validate_gslan_permissions() {
         MESSAGE="${UI_COMPENSATE}"
         echo_warn
         
-        MESSAGE="${UI_SET_FILE_PERMISSION} ${UI_GSLAN_NAME}"
+        MESSAGE="${UI_SET_FILE_PERMISSION} ${UI_NAME[$1]}"
         echo_stat
-        sudo chmod 644 ${DNSMAQ_DIR}/${GSLAN_CONF} >/dev/null 2>&1
+        sudo chmod 644 ${DNSMAQ_DIR}/${DNSMAQ_FILES[$1]} >/dev/null 2>&1
         error_validate
     fi
 }
-

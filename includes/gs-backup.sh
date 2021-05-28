@@ -14,8 +14,8 @@ function task_backup() {
     backup_local_gravity
     backup_local_gravity_integrity
     backup_local_custom
-    backup_local_cname
-    backup_local_gslan
+    backup_local_dnsmasq "CNAME"
+    backup_local_dnsmasq "GSLAN"
     backup_cleanup
     
     logs_export
@@ -73,35 +73,52 @@ function backup_local_custom() {
     fi
 }
 
-function backup_local_cname() {
-    if [ "${INCLUDE_CNAME}" == '1' ]
-    then
-        if [ -f ${DNSMAQ_DIR}/${CNAME_CONF} ]
-        then
-            MESSAGE="${UI_BACKUP_SECONDARY} ${UI_CNAME_NAME}"
-            echo_stat
+# function backup_local_cname() {
+#     if [ "${INCLUDE_CNAME}" == '1' ]
+#     then
+#         if [ -f ${DNSMAQ_DIR}/${CNAME_CONF} ]
+#         then
+#             MESSAGE="${UI_BACKUP_SECONDARY} ${UI_CNAME_NAME}"
+#             echo_stat
             
-            cp ${DNSMAQ_DIR}/${CNAME_CONF} ${LOCAL_FOLDR}/${BACKUP_FOLD}/${BACKUPTIMESTAMP}-${CNAME_CONF}.backup
-            error_validate
-        else
-            MESSAGE="No local ${CNAME_CONF} detected"
-            echo_info
-        fi
-    fi
-}
+#             cp ${DNSMAQ_DIR}/${CNAME_CONF} ${LOCAL_FOLDR}/${BACKUP_FOLD}/${BACKUPTIMESTAMP}-${CNAME_CONF}.backup
+#             error_validate
+#         else
+#             MESSAGE="No local ${CNAME_CONF} detected"
+#             echo_info
+#         fi
+#     fi
+# }
 
-function backup_local_gslan() {
-    if [ "${INCLUDE_GSLAN}" == '1' ]
+# function backup_local_gslan() {
+#     if [ "${INCLUDE_GSLAN}" == '1' ]
+#     then
+#         if [ -f ${DNSMAQ_DIR}/${GSLAN_CONF} ]
+#         then
+#             MESSAGE="${UI_BACKUP_SECONDARY} ${UI_GSLAN_NAME}"
+#             echo_stat
+
+#             cp ${DNSMAQ_DIR}/${GSLAN_CONF} ${LOCAL_FOLDR}/${BACKUP_FOLD}/${BACKUPTIMESTAMP}-${GSLAN_CONF}.backup
+#             error_validate
+#         else
+#             MESSAGE="No local ${GSLAN_CONF} detected"
+#             echo_info
+#         fi
+#     fi
+# }
+
+function backup_local_dnsmasq() {
+    if [ "${INCLUDE_FILES[$1]}" == '1' ]
     then
-        if [ -f ${DNSMAQ_DIR}/${GSLAN_CONF} ]
+        if [ -f ${DNSMAQ_DIR}/${DNSMAQ_FILES[$1]} ]
         then
-            MESSAGE="${UI_BACKUP_SECONDARY} ${UI_GSLAN_NAME}"
+            MESSAGE="${UI_BACKUP_SECONDARY} ${UI_NAME[$1]}"
             echo_stat
 
-            cp ${DNSMAQ_DIR}/${GSLAN_CONF} ${LOCAL_FOLDR}/${BACKUP_FOLD}/${BACKUPTIMESTAMP}-${GSLAN_CONF}.backup
+            cp ${DNSMAQ_DIR}/${DNSMAQ_FILES[$1]} ${LOCAL_FOLDR}/${BACKUP_FOLD}/${BACKUPTIMESTAMP}-${DNSMAQ_FILES[$1]}.backup
             error_validate
         else
-            MESSAGE="No local ${GSLAN_CONF} detected"
+            MESSAGE="No local ${DNSMAQ_FILES[$1]} detected"
             echo_info
         fi
     fi
@@ -151,26 +168,38 @@ function backup_remote_custom() {
     fi
 }
 
-function backup_remote_cname() {
-    if [ "$INCLUDE_CNAME" == '1' ]
-    then
-        MESSAGE="${UI_BACKUP_PRIMARY} ${UI_CNAME_NAME}"
-        echo_stat
+# function backup_remote_cname() {
+#     if [ "$INCLUDE_CNAME" == '1' ]
+#     then
+#         MESSAGE="${UI_BACKUP_PRIMARY} ${UI_CNAME_NAME}"
+#         echo_stat
         
-        CMD_TIMEOUT='15'
-        CMD_REQUESTED="sudo cp ${RNSMAQ_DIR}/${CNAME_CONF} ${RIHOLE_DIR}/dnsmasq.d-${CNAME_CONF}.backup"
-        create_sshcmd
-    fi
-}
+#         CMD_TIMEOUT='15'
+#         CMD_REQUESTED="sudo cp ${RNSMAQ_DIR}/${CNAME_CONF} ${RIHOLE_DIR}/dnsmasq.d-${CNAME_CONF}.backup"
+#         create_sshcmd
+#     fi
+# }
 
-function backup_remote_gslan() {
+# function backup_remote_gslan() {
+#     if [ "${INCLUDE_FILES[$1]}" == '1' ]
+#     then
+#         MESSAGE="${UI_BACKUP_PRIMARY} ${UI_NAME[$1]}"
+#         echo_stat
+
+#         CMD_TIMEOUT='15'
+#         CMD_REQUESTED="sudo cp ${RNSMAQ_DIR}/${GSLAN_CONF} ${RIHOLE_DIR}/dnsmasq.d-${GSLAN_CONF}.backup"
+#         create_sshcmd
+#     fi
+# }
+
+function backup_remote_dnsmasq() {
     if [ "$INCLUDE_GSLAN" == '1' ]
     then
-        MESSAGE="${UI_BACKUP_PRIMARY} ${UI_GSLAN_NAME}"
+        MESSAGE="${UI_BACKUP_PRIMARY} ${DNSMAQ_FILES[$1]}"
         echo_stat
 
         CMD_TIMEOUT='15'
-        CMD_REQUESTED="sudo cp ${RNSMAQ_DIR}/${GSLAN_CONF} ${RIHOLE_DIR}/dnsmasq.d-${GSLAN_CONF}.backup"
+        CMD_REQUESTED="sudo cp ${RNSMAQ_DIR}/${DNSMAQ_FILES[$1]} ${RIHOLE_DIR}/dnsmasq.d-${DNSMAQ_FILES[$1]}.backup"
         create_sshcmd
     fi
 }

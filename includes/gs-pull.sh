@@ -70,56 +70,106 @@ function pull_gs_cust {
 }
 
 ## Pull CNAME
-function pull_gs_cname {
-    if [ "${INCLUDE_CNAME}" == '1' ]
-    then
-        if [ "${REMOTE_DNS[CNAME]}" == "1" ]
-        then
-            backup_local_cname
-            backup_remote_cname
+# function pull_gs_cname {
+#     if [ "${INCLUDE_CNAME}" == '1' ]
+#     then
+#         if [ "${REMOTE_DNS[CNAME]}" == "1" ]
+#         then
+#             backup_local_cname
+#             backup_remote_cname
             
-            MESSAGE="${UI_PULL_PRIMARY} ${UI_CNAME_NAME}"
-            echo_stat
-            RSYNC_REPATH="rsync"
-            RSYNC_SOURCE="${REMOTE_USER}@${REMOTE_HOST}:${RIHOLE_DIR}/dnsmasq.d-${CNAME_CONF}.backup"
-            RSYNC_TARGET="${LOCAL_FOLDR}/${BACKUP_FOLD}/${CNAME_CONF}.pull"
-            create_rsynccmd
+#             MESSAGE="${UI_PULL_PRIMARY} ${UI_CNAME_NAME}"
+#             echo_stat
+#             RSYNC_REPATH="rsync"
+#             RSYNC_SOURCE="${REMOTE_USER}@${REMOTE_HOST}:${RIHOLE_DIR}/dnsmasq.d-${CNAME_CONF}.backup"
+#             RSYNC_TARGET="${LOCAL_FOLDR}/${BACKUP_FOLD}/${CNAME_CONF}.pull"
+#             create_rsynccmd
             
-            MESSAGE="${UI_REPLACE_SECONDARY} ${UI_CNAME_NAME}"
-            echo_stat
-            sudo cp ${LOCAL_FOLDR}/${BACKUP_FOLD}/${CNAME_CONF}.pull ${DNSMAQ_DIR}/${CNAME_CONF} >/dev/null 2>&1
-            error_validate
+#             MESSAGE="${UI_REPLACE_SECONDARY} ${UI_CNAME_NAME}"
+#             echo_stat
+#             sudo cp ${LOCAL_FOLDR}/${BACKUP_FOLD}/${CNAME_CONF}.pull ${DNSMAQ_DIR}/${CNAME_CONF} >/dev/null 2>&1
+#             error_validate
             
-            validate_cname_permissions
-        fi
-    fi
-}
+#             validate_cname_permissions
+#         fi
+#     fi
+# }
 
+# MERGE
 ## Pull GSLAN
-function pull_gs_gslan {
-    if [ "${INCLUDE_GSLAN}" == '1' ]
-    then
-        if [ "${REMOTE_DNS[GSLAN]}" == "1" ]
-        then
-            backup_local_gslan
-            backup_remote_gslan
+# function pull_gs_gslan {
+#     if [ "${INCLUDE_GSLAN}" == '1' ]
+#     then
+#         if [ "${REMOTE_DNS[GSLAN]}" == "1" ]
+#         then
+#             backup_local_gslan
+#             backup_remote_gslan
 
-            MESSAGE="${UI_PULL_PRIMARY} ${UI_GSLAN_NAME}"
+#             MESSAGE="${UI_PULL_PRIMARY} ${UI_GSLAN_NAME}"
+#             echo_stat
+#             RSYNC_REPATH="rsync"
+#             RSYNC_SOURCE="${REMOTE_USER}@${REMOTE_HOST}:${RIHOLE_DIR}/dnsmasq.d-${GSLAN_CONF}.backup"
+#             RSYNC_TARGET="${LOCAL_FOLDR}/${BACKUP_FOLD}/${GSLAN_CONF}.pull"
+#             create_rsynccmd
+
+#             MESSAGE="${UI_REPLACE_SECONDARY} ${UI_GSLAN_NAME}"
+#             echo_stat
+#             sudo cp ${LOCAL_FOLDR}/${BACKUP_FOLD}/${GSLAN_CONF}.pull ${DNSMAQ_DIR}/${GSLAN_CONF} >/dev/null 2>&1
+#             error_validate
+
+#             validate_gslan_permissions
+#         fi
+#     fi
+# }
+
+## Pull DNSMASQ file
+function pull_gs_dnsmasq {
+    if [ "${INCLUDE_FILES[$1]}" == '1' ]
+    then
+        if [ "${REMOTE_DNS[$1]}" == "1" ]
+        then
+            backup_local_dnsmasq $1
+            backup_remote_dnsmasq  $1
+
+            MESSAGE="${UI_PULL_PRIMARY} ${UI_NAME[$1]}"
             echo_stat
             RSYNC_REPATH="rsync"
-            RSYNC_SOURCE="${REMOTE_USER}@${REMOTE_HOST}:${RIHOLE_DIR}/dnsmasq.d-${GSLAN_CONF}.backup"
-            RSYNC_TARGET="${LOCAL_FOLDR}/${BACKUP_FOLD}/${GSLAN_CONF}.pull"
+            RSYNC_SOURCE="${REMOTE_USER}@${REMOTE_HOST}:${RIHOLE_DIR}/dnsmasq.d-${DNSMAQ_FILES[$1]}.backup"
+            RSYNC_TARGET="${LOCAL_FOLDR}/${BACKUP_FOLD}/${DNSMAQ_FILES[$1]}.pull"
             create_rsynccmd
 
-            MESSAGE="${UI_REPLACE_SECONDARY} ${UI_GSLAN_NAME}"
+            MESSAGE="${UI_REPLACE_SECONDARY} ${UI_NAME[$1]}"
             echo_stat
-            sudo cp ${LOCAL_FOLDR}/${BACKUP_FOLD}/${GSLAN_CONF}.pull ${DNSMAQ_DIR}/${GSLAN_CONF} >/dev/null 2>&1
+            sudo cp ${LOCAL_FOLDR}/${BACKUP_FOLD}/${DNSMAQ_FILES[$1]}.pull ${DNSMAQ_DIR}/${DNSMAQ_FILES[$1]} >/dev/null 2>&1
             error_validate
 
-            validate_gslan_permissions
+            validate_dnsmasq_permissions $1
         fi
     fi
 }
+
+## Pull DNSMASQ file
+# function pull_gs_dnsmasq {
+#     if [ "${REMOTE_DNS[$1]}" == "1" ]
+#     then
+#         backup_local_gslan
+#         backup_remote_gslan
+
+#         MESSAGE="${UI_PULL_PRIMARY} ${UI_GSLAN_NAME}"
+#         echo_stat
+#         RSYNC_REPATH="rsync"
+#         RSYNC_SOURCE="${REMOTE_USER}@${REMOTE_HOST}:${RIHOLE_DIR}/dnsmasq.d-${GSLAN_CONF}.backup"
+#         RSYNC_TARGET="${LOCAL_FOLDR}/${BACKUP_FOLD}/${GSLAN_CONF}.pull"
+#         create_rsynccmd
+
+#         MESSAGE="${UI_REPLACE_SECONDARY} ${UI_GSLAN_NAME}"
+#         echo_stat
+#         sudo cp ${LOCAL_FOLDR}/${BACKUP_FOLD}/${GSLAN_CONF}.pull ${DNSMAQ_DIR}/${GSLAN_CONF} >/dev/null 2>&1
+#         error_validate
+
+#         validate_gslan_permissions
+#     fi
+# }
 
 ## Pull Reload
 function pull_gs_reload {
@@ -146,8 +196,8 @@ function pull_gs {
     backup_settime
     pull_gs_grav
     pull_gs_cust
-    pull_gs_cname
-    pull_gs_gslan
+    pull_gs_dnsmasq "CNAME"
+    pull_gs_dnsmasq "GSLAN"
     pull_gs_reload
     md5_recheck
     backup_cleanup

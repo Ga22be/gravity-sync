@@ -7,8 +7,9 @@
 # Interface Settings
 UI_GRAVITY_NAME='Domain Database'
 UI_CUSTOM_NAME='Local DNS Records'
-UI_CNAME_NAME='Local DNS CNAMEs'
-UI_GSLAN_NAME='Local DNS Custom Configuration'
+declare -gA UI_NAME
+UI_NAME+=( ["CNAME"]='Local DNS CNAMEs')
+UI_NAME+=( ["GSLAN"]='Local DNS Custom Configuration' )
 
 # Core
 UI_INVALID_SELECTION='Invalid selection'

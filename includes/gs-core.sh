@@ -21,7 +21,7 @@ function start_gs {
         new_root_check
     fi
     
-    if [ [ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_GSLAN}" == "1" ] ] && [ "${SKIP_CUSTOM}" == "1" ]
+    if ( [ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_GSLAN}" == "1" ] ) && [ "${SKIP_CUSTOM}" == "1" ]
     then
         MESSAGE="${UI_INVALID_DNS_CONFIG} ${CONFIG_FILE}"
         echo_fail
@@ -68,17 +68,20 @@ function import_gs {
     if [ "$SKIP_CUSTOM" != "1" ]
     then
         declare -gA DNSMAQ_FILES
+        declare -gA INCLUDE_FILES
         if [ "$INCLUDE_CNAME" == "1" ]
         then
             DNSMAQ_FILES+=( ["CNAME"]=$CNAME_CONF )
+            INCLUDE_FILES+=( ["CNAME"]="1" )
         fi
         if [ "$INCLUDE_GSLAN" == "1" ]
         then
             DNSMAQ_FILES+=( ["GSLAN"]=$GSLAN_CONF )
+            INCLUDE_FILES+=( ["GSLAN"]="1" )
         fi
     fi
 
-    for K in "${!DNSMAQ_FILES[@]}"; do echo $K --- ${DNSMAQ_FILES[$K]}; done
+    # for K in "${!DNSMAQ_FILES[@]}"; do echo $K --- ${DNSMAQ_FILES[$K]}; done
 }
 
 function relocate_config_gs {

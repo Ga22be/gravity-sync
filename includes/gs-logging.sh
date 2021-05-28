@@ -25,8 +25,10 @@ function logs_export {
         echo -e ${secondDBMD5} >> ${LOG_PATH}/${HISTORY_MD5}
         echo -e ${primaryCLMD5} >> ${LOG_PATH}/${HISTORY_MD5}
         echo -e ${secondCLMD5} >> ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${primaryCNMD5} >> ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${secondCNMD5} >> ${LOG_PATH}/${HISTORY_MD5}
+        echo -e ${PRIMARY_MD5["CNAME"]} >> ${LOG_PATH}/${HISTORY_MD5}
+        echo -e ${SECONDARY_MD5["CNAME"]} >> ${LOG_PATH}/${HISTORY_MD5}
+        echo -e ${PRIMARY_MD5["GSLAN"]} >> ${LOG_PATH}/${HISTORY_MD5}
+        echo -e ${SECONDARY_MD5["GSLAN"]} >> ${LOG_PATH}/${HISTORY_MD5}
         error_validate
     fi
     

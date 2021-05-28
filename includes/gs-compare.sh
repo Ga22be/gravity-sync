@@ -18,8 +18,8 @@ function task_compare {
     
     previous_md5
     md5_compare
-    for K in "${!REMOTE_DNS[@]}"; do echo $K --- ${REMOTE_DNS[$K]}; done
-    echo "${REMOTE_DNS[GSLAN]}"
+    # for K in "${!REMOTE_DNS[@]}"; do echo $K --- ${REMOTE_DNS[$K]}; done
+    # echo "${REMOTE_DNS[GSLAN]}"
     backup_cleanup
 
 

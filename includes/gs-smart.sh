@@ -34,15 +34,16 @@ function smart_gs {
     SECDBCHANGE="0"
     PRICLCHANGE="0"
     SECCLCHANGE="0"
-    PRICNCHANGE="0"
-    SECCNCHANGE="0"
     
-    if [ "${primaryDBMD5}" != "${last_primaryDBMD5}" ]
+    PRICHANGE="0"
+    SECCHANGE="0"
+    
+    if [ "${primaryDBMD5}" != "${LAST_PRIMARY_MD5["DB"]}" ]
     then
         PRIDBCHANGE="1"
     fi
     
-    if [ "${secondDBMD5}" != "${last_secondDBMD5}" ]
+    if [ "${secondDBMD5}" != "${LAST_SECONDARY_MD5["DB"]}" ]
     then
         SECDBCHANGE="1"
     fi
@@ -84,12 +85,12 @@ function smart_gs {
         fi
     fi
     
-    if [ "${primaryCLMD5}" != "${last_primaryCLMD5}" ]
+    if [ "${primaryCLMD5}" != "${LAST_PRIMARY_MD5["CL"]}" ]
     then
         PRICLCHANGE="1"
     fi
     
-    if [ "${secondCLMD5}" != "${last_secondCLMD5}" ]
+    if [ "${secondCLMD5}" != "${LAST_SECONDARY_MD5["CL"]}" ]
     then
         SECCLCHANGE="1"
     fi
@@ -139,62 +140,65 @@ function smart_gs {
             PULLRESTART="1"
         fi
     fi
-    
-    if [ "${primaryCNMD5}" != "${last_primaryCNMD5}" ]
-    then
-        PRICNCHANGE="1"
-    fi
-    
-    if [ "${secondCNMD5}" != "${last_secondCNMD5}" ]
-    then
-        SECCNCHANGE="1"
-    fi
-    
-    if [ "$INCLUDE_CNAME" == "1" ]
-    then
-        if [ -f "${DNSMAQ_DIR}/${CNAME_CONF}" ]
+
+    for ENTRY_NAME in "${!DNSMAQ_FILES[@]}"
+    do
+        if [ "${PRIMARY_MD5[$ENTRY_NAME]}" != "${LAST_PRIMARY_MD5[$ENTRY_NAME]}" ]
         then
-            if [ "${PRICNCHANGE}" == "${SECCNCHANGE}" ]
+            PRICHANGE="1"
+        fi
+
+        if [ "${SECONDARY_MD5[$ENTRY_NAME]}" != "${LAST_SECONDARY_MD5[$ENTRY_NAME]}" ]
+        then
+            SECCHANGE="1"
+        fi
+
+        if [ -f "${DNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]}" ]
+        then
+            if [ "${PRICHANGE}" == "${SECCHANGE}" ]
             then
-                if [ "${PRICNCHANGE}" != "0" ]
+                if [ "${PRICHANGE}" != "0" ]
                 then
-                    MESSAGE="Both ${CNAME_CONF} Have Changed"
+                    MESSAGE="Both ${DNSMAQ_FILES[$ENTRY_NAME]} Have Changed"
                     echo_warn
                     
-                    PRICNDATE=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "stat -c %Y ${RNSMAQ_DIR}/${CNAME_CONF}")
-                    SECCNDATE=$(stat -c %Y ${DNSMAQ_DIR}/${CNAME_CONF})
+                    PRICNDATE=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "stat -c %Y ${RNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]}")
+                    SECCNDATE=$(stat -c %Y ${DNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]})
                     
-                    if (( "$PRICNDATE" >= "$SECCNDATE" ))
+                    if (( "$PRIDATE" >= "$SECDATE" ))
                     then
-                        MESSAGE="Primary ${CNAME_CONF} Last Changed"
+                        MESSAGE="Primary ${DNSMAQ_FILES[$ENTRY_NAME]} Last Changed"
                         echo_warn
                         
-                        pull_gs_cname
+                        pull_gs_dnsmasq $ENTRY_NAME
                         PULLRESTART="1"
                     else
-                        MESSAGE="Secondary ${CNAME_CONF} Last Changed"
+                        MESSAGE="Secondary ${DNSMAQ_FILES[$ENTRY_NAME]} Last Changed"
                         echo_warn
                         
-                        push_gs_cname
+                        push_gs_dnsmasq $ENTRY_NAME
                         PUSHRESTART="1"
                     fi
                 fi
             else
-                if [ "${PRICNCHANGE}" != "0" ]
+                if [ "${PRICHANGE}" != "0" ]
                 then
-                    pull_gs_cname
+                    pull_gs_dnsmasq $ENTRY_NAME
                     PULLRESTART="1"
-                elif [ "${SECCNCHANGE}" != "0" ]
+                elif [ "${SECCHANGE}" != "0" ]
                 then
-                    push_gs_cname
+                    push_gs_dnsmasq $ENTRY_NAME
                     PUSHRESTART="1"
                 fi
             fi
         else
-            pull_gs_cname
+            pull_gs_dnsmasq $ENTRY_NAME
             PULLRESTART="1"
         fi
-    fi
+
+        PRICHANGE="0"
+        SECCHANGE="0"        
+    done
     
     if [ "$PULLRESTART" == "1" ]
     then

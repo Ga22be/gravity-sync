@@ -215,7 +215,7 @@ function restore_gs {
             sudo cp ${LOCAL_FOLDR}/${BACKUP_FOLD}/${INPUT_CNAMEBACKUP_DATE}-${CNAME_CONF}.backup ${DNSMAQ_DIR}/${CNAME_CONF} >/dev/null 2>&1
             error_validate
             
-            validate_cname_permissions
+            validate_dnsmasq_permissions "CNAME"
         fi
     fi
     
