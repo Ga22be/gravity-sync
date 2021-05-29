@@ -146,11 +146,11 @@ function md5_compare {
     fi
 }
 
-function get_primary_md5 {
+function get_last_primary_md5 {
     echo $(sed "${PRIMARY_LOG_ROW[$1]}q;d" ${LOG_PATH}/${HISTORY_MD5})
 }
 
-function get_secondary_md5 {
+function get_last_secondary_md5 {
     echo $(sed "${SECONDARY_LOG_ROW[$1]}q;d" ${LOG_PATH}/${HISTORY_MD5})
 }
 
@@ -159,15 +159,15 @@ function previous_md5 {
     declare -gA LAST_SECONDARY_MD5
     if [ -f "${LOG_PATH}/${HISTORY_MD5}" ]
     then
-        LAST_PRIMARY_MD5["DB"]=$(get_primary_md5 "DB")
-        LAST_PRIMARY_MD5["CL"]=$(get_primary_md5 "CL")
-        LAST_PRIMARY_MD5["CNAME"]=$(get_primary_md5 "CNAME")
-        LAST_PRIMARY_MD5["GSLAN"]=$(get_primary_md5 "GSLAN")
+        LAST_PRIMARY_MD5["DB"]=$(get_last_primary_md5 "DB")
+        LAST_PRIMARY_MD5["CL"]=$(get_last_primary_md5 "CL")
+        LAST_PRIMARY_MD5["CNAME"]=$(get_last_primary_md5 "CNAME")
+        LAST_PRIMARY_MD5["GSLAN"]=$(get_last_primary_md5 "GSLAN")
 
-        LAST_SECONDARY_MD5["DB"]=$(get_secondary_md5 "DB")
-        LAST_SECONDARY_MD5["CL"]=$(get_secondary_md5 "CL")
-        LAST_SECONDARY_MD5["CNAME"]=$(get_secondary_md5 "CNAME")
-        LAST_SECONDARY_MD5["GSLAN"]=$(get_secondary_md5 "GSLAN")
+        LAST_SECONDARY_MD5["DB"]=$(get_last_secondary_md5 "DB")
+        LAST_SECONDARY_MD5["CL"]=$(get_last_secondary_md5 "CL")
+        LAST_SECONDARY_MD5["CNAME"]=$(get_last_secondary_md5 "CNAME")
+        LAST_SECONDARY_MD5["GSLAN"]=$(get_last_secondary_md5 "GSLAN")
     else
         LAST_PRIMARY_MD5["DB"]="0"
         LAST_PRIMARY_MD5["CL"]="0"
@@ -233,6 +233,8 @@ function md5_recheck {
     if [ "${SKIP_CUSTOM}" != '1' ]
     then
         declare -gA REMOTE_DNS
+        declare -gA PRIMARY_MD5
+        declare -gA SECONDARY_MD5
         for ENTRY_NAME in "${!DNSMAQ_FILES[@]}"
         do
             # echo $ENTRY_NAME --- ${DNSMAQ_FILES[$ENTRY_NAME]};
@@ -246,12 +248,12 @@ function md5_recheck {
                     MESSAGE="${UI_HASHING_REHASHING} ${!UI_NAME}"
                     echo_stat
                     
-                    primaryCNMD5=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} | sed 's/\s.*$//'")
+                    PRIMARY_MD5[$ENTRY_NAME]=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} | sed 's/\s.*$//'")
                     silent_error_validate
                     
                     MESSAGE="${UI_HASHING_RECOMPARING} ${!UI_NAME}"
                     echo_stat
-                    secondCNMD5=$(md5sum ${DNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} | sed 's/\s.*$//')
+                    SECONDARY_MD5[$ENTRY_NAME]=$(md5sum ${DNSMAQ_DIR}/${DNSMAQ_FILES[$ENTRY_NAME]} | sed 's/\s.*$//')
                     silent_error_validate
                 else
                     MESSAGE="${!UI_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"

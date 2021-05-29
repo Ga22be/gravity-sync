@@ -21,14 +21,15 @@ function logs_export {
         MESSAGE="${UI_LOGGING_HASHES}"
         echo_stat
         rm -f ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${primaryDBMD5} >> ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${secondDBMD5} >> ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${primaryCLMD5} >> ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${secondCLMD5} >> ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${PRIMARY_MD5["CNAME"]} >> ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${SECONDARY_MD5["CNAME"]} >> ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${PRIMARY_MD5["GSLAN"]} >> ${LOG_PATH}/${HISTORY_MD5}
-        echo -e ${SECONDARY_MD5["GSLAN"]} >> ${LOG_PATH}/${HISTORY_MD5}
+
+        echo -e ${primaryDBMD5} >> ${LOG_PATH}/${HISTORY_MD5}           # Row 1
+        echo -e ${secondDBMD5} >> ${LOG_PATH}/${HISTORY_MD5}            # Row 2
+        echo -e ${primaryCLMD5} >> ${LOG_PATH}/${HISTORY_MD5}           # Row 3
+        echo -e ${secondCLMD5} >> ${LOG_PATH}/${HISTORY_MD5}            # Row 4
+        echo -e ${PRIMARY_MD5["CNAME"]} >> ${LOG_PATH}/${HISTORY_MD5}   # Row 5
+        echo -e ${SECONDARY_MD5["CNAME"]} >> ${LOG_PATH}/${HISTORY_MD5} # Row 6
+        echo -e ${PRIMARY_MD5["GSLAN"]} >> ${LOG_PATH}/${HISTORY_MD5}   # Row 7
+        echo -e ${SECONDARY_MD5["GSLAN"]} >> ${LOG_PATH}/${HISTORY_MD5} # Row 8
         error_validate
     fi
     
